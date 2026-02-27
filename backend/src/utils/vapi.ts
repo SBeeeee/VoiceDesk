@@ -21,137 +21,145 @@ export const vapiClient = axios.create({
 });
 
 /* ─────────────────────────────────────────
-   Tool definitions — Vapi will call these
-   during live conversations
+   Step 1: Create tools in Vapi first
+   Returns tool IDs to attach to assistant
 ───────────────────────────────────────── */
 
-const buildVapiTools = (shopId: string) => [
-  {
-    type: "function",
-    function: {
-      name: "checkInventory",
-      description:
-        "Check if a product/item is available in the shop's inventory. Use this when a customer asks about product availability or stock.",
-      parameters: {
-        type: "object",
-        properties: {
-          shopId: {
-            type: "string",
-            description: "The shop ID",
-          },
-          itemName: {
-            type: "string",
-            description: "The name of the item to check",
-          },
-        },
-        required: ["shopId"],
-      },
-    },
-    server: {
-      url: `${process.env.BACKEND_URL}/api/vapi/tools`,
-    },
-    // Pre-fill shopId so Vapi always sends it
-    async: false,
-  },
-  {
-    type: "function",
-    function: {
-      name: "getServices",
-      description:
-        "Get all services offered by the shop including prices and duration. Use this when a customer asks about services, pricing, or timings.",
-      parameters: {
-        type: "object",
-        properties: {
-          shopId: {
-            type: "string",
-            description: "The shop ID",
-          },
-        },
-        required: ["shopId"],
-      },
-    },
-    server: {
-      url: `${process.env.BACKEND_URL}/api/vapi/tools`,
-    },
-    async: false,
-  },
-  {
-    type: "function",
-    function: {
-      name: "placeOrder",
-      description:
-        "Place an order for a customer who wants to buy products. Always confirm the order details with the customer before placing.",
-      parameters: {
-        type: "object",
-        properties: {
-          shopId: {
-            type: "string",
-            description: "The shop ID",
-          },
-          customerName: {
-            type: "string",
-            description: "Full name of the customer",
-          },
-          customerPhone: {
-            type: "string",
-            description: "Phone number of the customer",
-          },
-          items: {
-            type: "array",
-            description: "List of items to order",
-            items: {
-              type: "object",
-              properties: {
-                itemName: { type: "string" },
-                quantity: { type: "number" },
-              },
-              required: ["itemName", "quantity"],
+export const createVapiTools = async (shopId: string) => {
+  const toolDefs = [
+    {
+      type: "function",
+      function: {
+        name: "checkInventory",
+        description:
+          "Check if a product is available in the shop inventory. Call this when customer asks about product availability or stock.",
+        parameters: {
+          type: "object",
+          properties: {
+            shopId: {
+              type: "string",
+              description: "The shop ID",
+            },
+            itemName: {
+              type: "string",
+              description: "The name of the item to check",
             },
           },
+          required: ["shopId"],
         },
-        required: ["shopId", "customerName", "customerPhone", "items"],
+      },
+      server: {
+        url: `${process.env.BACKEND_URL}/api/vapi/tools`,
       },
     },
-    server: {
-      url: `${process.env.BACKEND_URL}/api/vapi/tools`,
-    },
-    async: false,
-  },
-  {
-    type: "function",
-    function: {
-      name: "captureLead",
-      description:
-        "Save a customer's contact details as a lead when they are enquiring but not ready to order. Always ask for name and phone number.",
-      parameters: {
-        type: "object",
-        properties: {
-          shopId: {
-            type: "string",
-            description: "The shop ID",
+    {
+      type: "function",
+      function: {
+        name: "getServices",
+        description:
+          "Get all services offered by the shop with prices and duration. Call this when customer asks about services, pricing, or timings.",
+        parameters: {
+          type: "object",
+          properties: {
+            shopId: {
+              type: "string",
+              description: "The shop ID",
+            },
           },
-          name: {
-            type: "string",
-            description: "Customer's full name",
-          },
-          phone: {
-            type: "string",
-            description: "Customer's phone number",
-          },
-          note: {
-            type: "string",
-            description: "Any additional notes about what the customer is interested in",
-          },
+          required: ["shopId"],
         },
-        required: ["shopId", "name", "phone"],
+      },
+      server: {
+        url: `${process.env.BACKEND_URL}/api/vapi/tools`,
       },
     },
-    server: {
-      url: `${process.env.BACKEND_URL}/api/vapi/tools`,
+    {
+      type: "function",
+      function: {
+        name: "placeOrder",
+        description:
+          "Place an order for a customer. Always confirm items and quantity with the customer before calling this.",
+        parameters: {
+          type: "object",
+          properties: {
+            shopId: {
+              type: "string",
+              description: "The shop ID",
+            },
+            customerName: {
+              type: "string",
+              description: "Full name of the customer",
+            },
+            customerPhone: {
+              type: "string",
+              description: "Phone number of the customer",
+            },
+            items: {
+              type: "array",
+              description: "List of items to order",
+              items: {
+                type: "object",
+                properties: {
+                  itemName: { type: "string" },
+                  quantity: { type: "number" },
+                },
+                required: ["itemName", "quantity"],
+              },
+            },
+          },
+          required: ["shopId", "customerName", "customerPhone", "items"],
+        },
+      },
+      server: {
+        url: `${process.env.BACKEND_URL}/api/vapi/tools`,
+      },
     },
-    async: false,
-  },
-];
+    {
+      type: "function",
+      function: {
+        name: "captureLead",
+        description:
+          "Save customer contact details as a lead when they are enquiring but not ready to order. Ask for name and phone.",
+        parameters: {
+          type: "object",
+          properties: {
+            shopId: {
+              type: "string",
+              description: "The shop ID",
+            },
+            name: {
+              type: "string",
+              description: "Customer full name",
+            },
+            phone: {
+              type: "string",
+              description: "Customer phone number",
+            },
+            note: {
+              type: "string",
+              description: "What the customer is interested in",
+            },
+          },
+          required: ["shopId", "name", "phone"],
+        },
+      },
+      server: {
+        url: `${process.env.BACKEND_URL}/api/vapi/tools`,
+      },
+    },
+  ];
+
+  // Create each tool in Vapi and collect their IDs
+  const toolIds: string[] = [];
+
+  for (const toolDef of toolDefs) {
+    const response = await vapiClient.post("/tool", toolDef);
+    console.log(`✅ Vapi tool created: ${toolDef.function.name} → ${response.data.id}`);
+    toolIds.push(response.data.id);
+  }
+
+  return toolIds;
+};
 
 /* ─────────────────────────────────────────
    Create Vapi Assistant
@@ -160,8 +168,12 @@ const buildVapiTools = (shopId: string) => [
 export const createVapiAssistant = async (
   name: string,
   voicePrompt: string,
-  shopId: string  // ← add shopId param
+  shopId: string
 ) => {
+  // First create tools
+  const toolIds = await createVapiTools(shopId);
+
+  // Then create assistant with tool IDs attached
   const response = await vapiClient.post("/assistant", {
     name,
     model: {
@@ -175,16 +187,16 @@ export const createVapiAssistant = async (
             `\n\nIMPORTANT: Your shopId is "${shopId}". Always pass this shopId when calling any tool.`,
         },
       ],
-      tools: buildVapiTools(shopId),
+      toolIds, // ← attach tool IDs here
     },
     voice: {
-       provider: "openai",
-  voiceId: "alloy", // you can change this
+      provider: "playht",
+      voiceId: "jennifer",
     },
     serverUrl: `${process.env.BACKEND_URL}/api/webhook/vapi`,
   });
 
-  return response.data;
+  return { ...response.data, toolIds };
 };
 
 /* ─────────────────────────────────────────
@@ -194,7 +206,7 @@ export const createVapiAssistant = async (
 export const updateVapiAssistant = async (
   assistantId: string,
   voicePrompt: string,
-  shopId: string  // ← add shopId param
+  shopId: string
 ) => {
   const response = await vapiClient.patch(`/assistant/${assistantId}`, {
     model: {
@@ -208,7 +220,6 @@ export const updateVapiAssistant = async (
             `\n\nIMPORTANT: Your shopId is "${shopId}". Always pass this shopId when calling any tool.`,
         },
       ],
-      tools: buildVapiTools(shopId),
     },
   });
 
