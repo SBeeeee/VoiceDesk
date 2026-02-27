@@ -187,10 +187,15 @@ export const createVapiAssistant = async (
             `\n\nIMPORTANT: Your shopId is "${shopId}". Always pass this shopId when calling any tool.`,
         },
       ],
-      toolIds, // ← attach tool IDs here
+      toolIds, 
     },
     
-    serverUrl: `${process.env.BACKEND_URL}/api/webhook/vapi`,
+    server: {
+    url: `${process.env.BACKEND_URL}/api/webhook/vapi`,
+  },
+  
+  serverMessages: ["end-of-call-report"],
+    
   });
 
   return { ...response.data, toolIds };
