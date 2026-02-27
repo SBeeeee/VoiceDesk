@@ -178,8 +178,8 @@ export const createVapiAssistant = async (
       tools: buildVapiTools(shopId),
     },
     voice: {
-      provider: "playht",
-      voiceId: "jennifer", // you can change this
+       provider: "openai",
+  voiceId: "alloy", // you can change this
     },
     serverUrl: `${process.env.BACKEND_URL}/api/webhook/vapi`,
   });
