@@ -32,7 +32,8 @@ export const handleVapiWebhook = async (req: Request, res: Response) => {
 
 export const handleVapiTool = async (req: Request, res: Response) => {
   try {
-    const { toolCallList } = req.body;
+    // Handle both Vapi's format and Postman test format
+    const toolCallList = req.body.message?.toolCallList || req.body.toolCallList;
 
     if (!toolCallList || toolCallList.length === 0) {
       return res.status(400).json({ error: "No tool calls provided" });
@@ -41,7 +42,11 @@ export const handleVapiTool = async (req: Request, res: Response) => {
     const results = [];
 
     for (const toolCall of toolCallList) {
-      const { name, parameters } = toolCall;
+      // Vapi sends: toolCall.function.name + toolCall.function.arguments
+      // Postman sends: toolCall.name + toolCall.parameters
+      const name = toolCall.function?.name || toolCall.name;
+      const parameters = toolCall.function?.arguments || toolCall.parameters;
+
       const { shopId } = parameters;
 
       if (!shopId) {
@@ -99,6 +104,7 @@ export const handleVapiTool = async (req: Request, res: Response) => {
       });
     }
 
+    // Vapi expects this exact response format
     return res.status(200).json({ results });
   } catch (error: any) {
     console.error("❌ Vapi tool error:", error.message);
