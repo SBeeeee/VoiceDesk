@@ -189,10 +189,7 @@ export const createVapiAssistant = async (
       ],
       toolIds, // ← attach tool IDs here
     },
-    voice: {
-      provider: "playht",
-      voiceId: "jennifer",
-    },
+    
     serverUrl: `${process.env.BACKEND_URL}/api/webhook/vapi`,
   });
 
