@@ -11,7 +11,7 @@ export const getLeads = async (req: AuthRequest, res: Response) => {
 
     const { status } = req.query;
     const leads = await getLeadsService(shop._id.toString(), status as string);
-    res.json({ success: true, data: leads });
+    res.json({ success: true, leads: leads });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -26,7 +26,7 @@ export const updateLeadStatus = async (req: AuthRequest, res: Response) => {
 
     const { leadId } = req.params;
     const { status } = req.body;
-    
+
     const lead = await updateLeadStatusService(shop._id.toString(), leadId as string, status);
     res.json({ success: true, data: lead });
   } catch (error: any) {

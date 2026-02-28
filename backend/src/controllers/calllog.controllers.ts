@@ -10,7 +10,7 @@ export const getCallLogs = async (req: AuthRequest, res: Response) => {
     }
 
     const logs = await getCallLogsService(shop._id.toString());
-    res.json({ success: true, data: logs });
+    res.json({ success: true, logs: logs });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
   }

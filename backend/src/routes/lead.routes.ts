@@ -7,7 +7,7 @@ const router = express.Router();
 
 // All lead routes require both authentication and shop ownership verification
 router.get("/", verifyUser, verifyShopOwner, getLeads);
-router.put("/:leadId/status", verifyUser, verifyShopOwner, updateLeadStatus);
+router.patch("/:leadId/status", verifyUser, verifyShopOwner, updateLeadStatus);
 router.delete("/:leadId", verifyUser, verifyShopOwner, deleteLead);
 
 export default router;

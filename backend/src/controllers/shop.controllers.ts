@@ -10,7 +10,7 @@ export const createShop = async (req: AuthRequest, res: Response) => {
     }
 
     const shop = await createShopService(ownerId, req.body);
-    res.status(201).json({ success: true, data: shop });
+    res.status(201).json({ success: true, shop: shop });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -24,7 +24,7 @@ export const getMyShop = async (req: AuthRequest, res: Response) => {
     }
 
     const shop = await getMyShopService(ownerId);
-    res.json({ success: true, data: shop });
+    res.json({ success: true, shop: shop });
   } catch (error: any) {
     res.status(404).json({ success: false, message: error.message });
   }
@@ -34,7 +34,7 @@ export const getShopBySlug = async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
     const shop = await getShopBySlugService(slug as string);
-    res.json({ success: true, data: shop });
+    res.json({ success: true, shop: shop });
   } catch (error: any) {
     res.status(404).json({ success: false, message: error.message });
   }
@@ -48,11 +48,12 @@ export const updateShop = async (req: AuthRequest, res: Response) => {
     }
 
     const shop = await updateShopService(ownerId, req.body);
-    res.json({ success: true, data: shop });
+    res.json({ success: true, shop: shop });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
 
 export const deleteShop = async (req: AuthRequest, res: Response) => {
   try {

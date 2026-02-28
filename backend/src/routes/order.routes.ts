@@ -8,6 +8,6 @@ const router = express.Router();
 // All order routes require both authentication and shop ownership verification
 router.get("/", verifyUser, verifyShopOwner, getOrders);
 router.get("/:orderId", verifyUser, verifyShopOwner, getOrderById);
-router.put("/:orderId/status", verifyUser, verifyShopOwner, updateOrderStatus);
+router.patch("/:orderId/status", verifyUser, verifyShopOwner, updateOrderStatus);
 
 export default router;

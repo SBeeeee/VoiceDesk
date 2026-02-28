@@ -84,3 +84,21 @@ export const deleteInventoryItemService = async (
 
   if (!item) throw new Error("Item not found");
 };
+
+/* ─────────────────────────────────────────
+   Restock Inventory Item
+   ───────────────────────────────────────── */
+export const restockInventoryItemService = async (
+  shopId: string,
+  itemId: string,
+  amount: number
+) => {
+  const item = await InventoryItem.findOneAndUpdate(
+    { _id: itemId, shop: shopId },
+    { $inc: { quantity: amount } },
+    { new: true }
+  );
+
+  if (!item) throw new Error("Item not found");
+  return item;
+};

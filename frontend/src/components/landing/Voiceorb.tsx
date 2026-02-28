@@ -1,7 +1,7 @@
 "use client";
 // src/components/landing/VoiceOrb.tsx
 import { useState, useEffect } from "react";
-import { MicIcon } from "./icons";
+import { MicIcon } from "@/src/components/landing/icons";
 
 export const VoiceOrb = () => {
   const [bars, setBars] = useState<number[]>(

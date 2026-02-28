@@ -1,9 +1,9 @@
-import { Navbar } from "../components/Navbar";
-import { HeroSection } from "../components/HeroSection";
-import { HowItWorks } from "../components/HowItWorks";
-import { FeaturesSection } from "../components/FeaturesSection";
-import { CTABanner } from "../components/CtaBanner";
-import { Footer } from "../components/Footer";
+import { Navbar } from "@/src/components/landing/Navbar";
+import { HeroSection } from "@/src/components/landing/HeroSection";
+import { HowItWorks } from "@/src/components/landing/HowItWorks";
+import { FeaturesSection } from "@/src/components/landing/FeaturesSection";
+import { CTABanner } from "@/src/components/landing/CtaBanner";
+import { Footer } from "@/src/components/landing/Footer";
 
 export default function LandingPage() {
   return (

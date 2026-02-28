@@ -11,7 +11,7 @@ export const getOrders = async (req: AuthRequest, res: Response) => {
 
     const { status } = req.query;
     const orders = await getOrdersService(shop._id.toString(), status as string);
-    res.json({ success: true, data: orders });
+    res.json({ success: true, orders: orders });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -41,7 +41,7 @@ export const updateOrderStatus = async (req: AuthRequest, res: Response) => {
 
     const { orderId } = req.params;
     const { status } = req.body;
-    
+
     const order = await updateOrderStatusService(shop._id.toString(), orderId as string, status);
     res.json({ success: true, data: order });
   } catch (error: any) {

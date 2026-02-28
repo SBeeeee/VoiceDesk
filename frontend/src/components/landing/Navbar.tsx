@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MicIcon } from "./icons";
+import { MicIcon } from "@/src/components/landing/icons"
 
 export const Navbar = () => {
   return (

@@ -1,4 +1,4 @@
-import { VoiceOrb } from "./Voiceorb";
+import { VoiceOrb } from "@/src/components/landing/Voiceorb";
 
 export const HeroSection = () => {
   return (
