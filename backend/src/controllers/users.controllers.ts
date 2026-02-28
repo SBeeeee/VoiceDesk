@@ -9,8 +9,8 @@ export const register = async (req: Request, res: Response) => {
     // 1️⃣ Set cookie first
     res.cookie(process.env.COOKIE_NAME as string, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 3 * 24 * 60 * 60 * 1000,
     });
 
@@ -29,7 +29,7 @@ export const login = async (req: Request, res: Response) => {
     res.cookie(process.env.COOKIE_NAME as string, token, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "none",
       maxAge: 3 * 24 * 60 * 60 * 1000,
     });
 
