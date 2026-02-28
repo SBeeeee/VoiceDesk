@@ -10,9 +10,10 @@ export const register = async (req: Request, res: Response) => {
     res.cookie(process.env.COOKIE_NAME as string, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 3 * 24 * 60 * 60 * 1000,
     });
+
 
     // 2️⃣ Send response
     res.status(201).json({ message: "User registered", user });
@@ -28,9 +29,10 @@ export const login = async (req: Request, res: Response) => {
     res.cookie(process.env.COOKIE_NAME as string, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 3 * 24 * 60 * 60 * 1000,
     });
+
 
     res.status(200).json({ message: "Login successful", user });
   } catch (err: any) {
