@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.models.js";
 
-type Role =  "user" | "shopkeeper";
+type Role = "user" | "shopkeeper";
 
 interface RegisterInput {
   username: string;
@@ -16,7 +16,7 @@ interface LoginInput {
   password: string;
 }
 
-  const generateToken = (userId: string): string => {
+const generateToken = (userId: string): string => {
   const jwtSecret = process.env.JWT_SECRET;
 
   if (!jwtSecret) {
@@ -101,4 +101,16 @@ export const loginUser = async ({
     user: safeUser,
     token,
   };
+};
+
+/* =========================
+   GET USER BY ID
+========================= */
+
+export const getUserById = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user;
 };

@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: #fafaf8;
+  color: #1a1a1a;
+}
+
+::selection {
+  background: #f2c4c0;
+  color: #1a1a1a;
+}

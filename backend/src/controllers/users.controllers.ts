@@ -1,5 +1,6 @@
-import { registerUser, loginUser } from "../services/user.services.js";
+import { registerUser, loginUser, getUserById } from "../services/user.services.js";
 import { Request, Response } from "express";
+import { AuthRequest } from "../middlewares/auth.middlewares.js";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -32,6 +33,23 @@ export const login = async (req: Request, res: Response) => {
     });
 
     res.status(200).json({ message: "Login successful", user });
+  } catch (err: any) {
+    res.status(401).json({ error: err.message });
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  res.cookie(process.env.COOKIE_NAME as string, "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({ message: "Logged out" });
+};
+
+export const getMe = async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await getUserById(req.userId as string);
+    res.status(200).json({ user });
   } catch (err: any) {
     res.status(401).json({ error: err.message });
   }
