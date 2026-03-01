@@ -4,13 +4,14 @@ import { createShop, getMyShop, getShopBySlug, updateShop, deleteShop } from "..
 
 const router = express.Router();
 
-// Public routes
-router.get("/slug/:slug", getShopBySlug);
-
 // Protected routes (require authentication)
 router.post("/", verifyUser, createShop);
 router.get("/my", verifyUser, getMyShop);
 router.put("/", verifyUser, updateShop);
 router.delete("/", verifyUser, deleteShop);
+
+// Public routes
+router.get("/:slug", getShopBySlug);
+
 
 export default router;

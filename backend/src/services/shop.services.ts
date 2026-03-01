@@ -1,19 +1,18 @@
-import Shop,{IShop} from "../models/shop.models.js"
+import Shop, { IShop } from "../models/shop.models.js"
 import User from "../models/user.models.js"
-import { createVapiAssistant,updateVapiAssistant,deleteVapiAssistant } from "../utils/vapi.js"
+import { createVapiAssistant, updateVapiAssistant, deleteVapiAssistant } from "../utils/vapi.js"
 
 
 export const buildVoicePrompt = (shop: Partial<IShop>): string => {
   const servicesList =
     shop.services && shop.services.length > 0
       ? shop.services
-          .map(
-            (s) =>
-              `- ${s.name}: ₹${s.price}${s.duration ? ` (${s.duration})` : ""}${
-                s.shortDescription ? ` — ${s.shortDescription}` : ""
-              }`
-          )
-          .join("\n")
+        .map(
+          (s) =>
+            `- ${s.name}: ₹${s.price}${s.duration ? ` (${s.duration})` : ""}${s.shortDescription ? ` — ${s.shortDescription}` : ""
+            }`
+        )
+        .join("\n")
       : "No services listed yet.";
 
   const hours = shop.businessHours
@@ -39,6 +38,7 @@ Your responsibilities:
 4. Place orders on behalf of the customer if they want to buy something.
 5. Capture customer name and phone number as a lead if they are just enquiring.
 6. Always be polite, concise, and professional.
+7.If you see Rs or something like that say it as Rupees not RS
 
 If you don't know something, say "Let me check that for you" and use the available tools.
   `.trim();
@@ -107,7 +107,7 @@ export const getMyShopService = async (ownerId: string) => {
 
 export const getShopBySlugService = async (slug: string) => {
   const shop = await Shop.findOne({ slug, isActive: true }).select(
-    "-vapiAssistantId -voicePrompt -owner"
+    "-voicePrompt -owner"
   );
   if (!shop) throw new Error("Shop not found");
   return shop;

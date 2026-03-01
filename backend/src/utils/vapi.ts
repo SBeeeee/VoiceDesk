@@ -175,7 +175,7 @@ export const createVapiAssistant = async (
 
   // Then create assistant with tool IDs attached
   const response = await vapiClient.post("/assistant", {
-    name,
+    firstMessage: `Hello! Welcome to ${name}. How can I help you today?`,
     model: {
       provider: "openai",
       model: "gpt-4o-mini",
@@ -187,15 +187,22 @@ export const createVapiAssistant = async (
             `\n\nIMPORTANT: Your shopId is "${shopId}". Always pass this shopId when calling any tool.`,
         },
       ],
-      toolIds, 
+      toolIds,
     },
-    
+    voice: {
+      provider: "11labs",
+      voiceId: "sarah", // A reliable default
+    },
+    transcriber: {
+      provider: "deepgram",
+      model: "nova-2",
+      language: "en-US",
+    },
     server: {
-    url: `${process.env.BACKEND_URL}/api/webhook/vapi`,
-  },
-  
-  serverMessages: ["end-of-call-report"],
-    
+      url: `${process.env.BACKEND_URL}/api/webhook/vapi`,
+    },
+    serverMessages: ["end-of-call-report"],
+
   });
 
   return { ...response.data, toolIds };
