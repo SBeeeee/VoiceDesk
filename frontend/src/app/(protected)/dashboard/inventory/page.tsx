@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "@/src/utils/api";
+import DataTable, { Column, ActionButton } from "@/src/components/dashboard/DataTable";
 
 interface InventoryItem {
   _id: string;
@@ -11,6 +12,21 @@ interface InventoryItem {
   lowStockThreshold: number;
   isActive: boolean;
 }
+
+const isLow = (item: InventoryItem) => item.quantity <= item.lowStockThreshold;
+
+/* ── icons ── */
+const RestockIcon = (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+  </svg>
+);
+
+const DeleteIcon = (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+  </svg>
+);
 
 export default function InventoryPage() {
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -59,7 +75,40 @@ export default function InventoryPage() {
     fetchItems();
   };
 
-  const isLow = (item: InventoryItem) => item.quantity <= item.lowStockThreshold;
+  const columns: Column<InventoryItem>[] = [
+    { key: "name", label: "Item", className: "font-medium text-gray-800" },
+    { key: "sku", label: "SKU", className: "text-gray-400", render: (r) => r.sku ?? "—" },
+    { key: "price", label: "Price", render: (r) => <span>₹{r.price}</span> },
+    { key: "quantity", label: "Stock" },
+    {
+      key: "status",
+      label: "Status",
+      render: (r) => (
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${isLow(r)
+            ? "bg-red-50 text-red-500 border border-red-100"
+            : "bg-green-50 text-green-600 border border-green-100"
+          }`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${isLow(r) ? "bg-red-400" : "bg-green-500"}`} />
+          {isLow(r) ? "Low stock" : "In stock"}
+        </span>
+      ),
+    },
+  ];
+
+  const actions: ActionButton<InventoryItem>[] = [
+    {
+      icon: RestockIcon,
+      tooltip: "Restock +10",
+      onClick: (r) => handleRestock(r._id, 10),
+      color: "text-gray-400 hover:text-pink-500",
+    },
+    {
+      icon: DeleteIcon,
+      tooltip: "Remove item",
+      onClick: (r) => handleDelete(r._id),
+      color: "text-gray-400 hover:text-red-500",
+    },
+  ];
 
   return (
     <div className="p-8">
@@ -112,65 +161,14 @@ export default function InventoryPage() {
         </form>
       )}
 
-      {/* Table */}
-      <div className="bg-white border border-pink-100 rounded-2xl overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <svg className="w-5 h-5 text-pink-300 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-          </div>
-        ) : items.length === 0 ? (
-          <div className="text-center py-16 text-gray-400 text-sm">No inventory items yet.</div>
-        ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-pink-50">
-                {["Item", "SKU", "Price", "Stock", "Status", ""].map((h) => (
-                  <th key={h} className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-5 py-3.5">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-pink-50">
-              {items.map((item) => (
-                <tr key={item._id} className="hover:bg-pink-50/30 transition-colors">
-                  <td className="px-5 py-3.5 text-sm font-medium text-gray-800">{item.name}</td>
-                  <td className="px-5 py-3.5 text-sm text-gray-400">{item.sku ?? "—"}</td>
-                  <td className="px-5 py-3.5 text-sm text-gray-800">₹{item.price}</td>
-                  <td className="px-5 py-3.5 text-sm text-gray-800">{item.quantity}</td>
-                  <td className="px-5 py-3.5">
-                    <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
-                      isLow(item)
-                        ? "bg-red-50 text-red-500 border border-red-100"
-                        : "bg-green-50 text-green-600 border border-green-100"
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${isLow(item) ? "bg-red-400" : "bg-green-500"}`} />
-                      {isLow(item) ? "Low stock" : "In stock"}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2 justify-end">
-                      <button
-                        onClick={() => handleRestock(item._id, 10)}
-                        className="text-xs text-pink-500 hover:text-pink-700 font-medium transition-colors"
-                      >
-                        +10
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item._id)}
-                        className="text-xs text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <DataTable
+        columns={columns}
+        data={items}
+        loading={loading}
+        emptyMessage="No inventory items yet."
+        actions={actions}
+        rowKey={(r) => r._id}
+      />
     </div>
   );
 }

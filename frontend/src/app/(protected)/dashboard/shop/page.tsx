@@ -16,7 +16,7 @@ export default function ShopPage() {
     phone: "",
     address: "",
     businessHours: { open: "09:00", close: "18:00", days: [] as string[] },
-    services: [] as { name: string; price: number; duration: string; shortDescription: string }[],
+    services: [] as { name: string; price: number; duration?: string; shortDescription?: string }[],
   });
 
   const [saved, setSaved] = useState(false);
@@ -36,7 +36,12 @@ export default function ShopPage() {
           close: shop.businessHours?.close ?? "18:00",
           days: shop.businessHours?.days ?? [],
         },
-        services: shop.services ?? [],
+        services: (shop.services ?? []).map((s: any) => ({
+          name: s.name ?? "",
+          price: s.price ?? 0,
+          duration: s.duration ?? "",
+          shortDescription: s.shortDescription ?? "",
+        })),
       });
     }
   }, [shop]);
@@ -203,8 +208,8 @@ export default function ShopPage() {
                 type="button"
                 onClick={() => toggleDay(day)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${form.businessHours.days.includes(day)
-                    ? "bg-pink-500 text-white"
-                    : "bg-pink-50 text-gray-500 hover:bg-pink-100"
+                  ? "bg-pink-500 text-white"
+                  : "bg-pink-50 text-gray-500 hover:bg-pink-100"
                   }`}
               >
                 {day}

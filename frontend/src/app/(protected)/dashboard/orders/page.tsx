@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "@/src/utils/api";
+import DataTable, { Column, ActionButton } from "@/src/components/dashboard/DataTable";
 
 interface Order {
   _id: string;
@@ -12,16 +13,24 @@ interface Order {
   createdAt: string;
 }
 
-const statusStyles = {
-  PLACED:    "bg-yellow-50 text-yellow-600 border-yellow-100",
-  CONFIRMED: "bg-blue-50 text-blue-600 border-blue-100",
-  COMPLETED: "bg-green-50 text-green-600 border-green-100",
+const statusStyles: Record<string, string> = {
+  PLACED: "bg-yellow-50 text-yellow-600 border border-yellow-100",
+  CONFIRMED: "bg-blue-50 text-blue-600 border border-blue-100",
+  COMPLETED: "bg-green-50 text-green-600 border border-green-100",
 };
 
-const nextStatus: Record<string, string> = {
-  PLACED: "CONFIRMED",
-  CONFIRMED: "COMPLETED",
-};
+/* ── icons ── */
+const ConfirmIcon = (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  </svg>
+);
+
+const CompleteIcon = (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+  </svg>
+);
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -47,6 +56,57 @@ export default function OrdersPage() {
 
   const filters = ["ALL", "PLACED", "CONFIRMED", "COMPLETED"];
 
+  const columns: Column<Order>[] = [
+    { key: "customerName", label: "Customer", className: "font-medium text-gray-800" },
+    { key: "customerPhone", label: "Phone", className: "text-gray-600" },
+    {
+      key: "items",
+      label: "Items",
+      className: "text-gray-500",
+      render: (r) => (
+        <span className="text-xs">
+          {r.items.map((i) => `${i.item?.name ?? "?"} ×${i.quantity}`).join(", ")}
+        </span>
+      ),
+    },
+    {
+      key: "totalAmount",
+      label: "Total",
+      className: "font-semibold text-pink-600",
+      render: (r) => `₹${r.totalAmount}`,
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (r) => (
+        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[r.status]}`}>
+          {r.status}
+        </span>
+      ),
+    },
+    {
+      key: "createdAt",
+      label: "Date",
+      className: "text-xs text-gray-400",
+      render: (r) => new Date(r.createdAt).toLocaleDateString(),
+    },
+  ];
+
+  const actions: ActionButton<Order>[] = [
+    {
+      icon: ConfirmIcon,
+      tooltip: "Confirm Order",
+      onClick: (r) => handleStatusUpdate(r._id, "CONFIRMED"),
+      color: "text-gray-400 hover:text-blue-500",
+    },
+    {
+      icon: CompleteIcon,
+      tooltip: "Mark Completed",
+      onClick: (r) => handleStatusUpdate(r._id, "COMPLETED"),
+      color: "text-gray-400 hover:text-green-500",
+    },
+  ];
+
   return (
     <div className="p-8">
       <div className="mb-6">
@@ -60,68 +120,24 @@ export default function OrdersPage() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              filter === f
-                ? "bg-pink-500 text-white"
-                : "bg-white border border-pink-100 text-gray-500 hover:border-pink-200"
-            }`}
+            className={`px-4 py-1.5 rounded-xl text-xs font-semibold transition-all ${filter === f
+              ? "bg-pink-500 text-white"
+              : "bg-white border border-pink-100 text-gray-500 hover:border-pink-200"
+              }`}
           >
             {f}
           </button>
         ))}
       </div>
 
-      <div className="space-y-3">
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <svg className="w-5 h-5 text-pink-300 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-          </div>
-        ) : orders.length === 0 ? (
-          <div className="bg-white border border-pink-100 rounded-2xl py-16 text-center text-gray-400 text-sm">
-            No orders yet.
-          </div>
-        ) : (
-          orders.map((order) => (
-            <div key={order._id} className="bg-white border border-pink-100 rounded-2xl p-5">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <p className="text-sm font-semibold text-gray-800">{order.customerName}</p>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusStyles[order.status]}`}>
-                      {order.status}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-400">{order.customerPhone} · {new Date(order.createdAt).toLocaleString()}</p>
-                </div>
-                <p className="text-base font-bold text-pink-600">₹{order.totalAmount}</p>
-              </div>
-
-              {/* Items */}
-              <div className="bg-pink-50/50 rounded-xl px-4 py-3 mb-3 space-y-1">
-                {order.items.map((item, i) => (
-                  <div key={i} className="flex justify-between text-xs text-gray-600">
-                    <span>{item.item?.name} × {item.quantity}</span>
-                    <span>₹{item.priceAtPurchase * item.quantity}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Action */}
-              {nextStatus[order.status] && (
-                <button
-                  onClick={() => handleStatusUpdate(order._id, nextStatus[order.status])}
-                  className="text-xs font-semibold text-pink-500 hover:text-pink-700 transition-colors"
-                >
-                  Mark as {nextStatus[order.status]} →
-                </button>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+      <DataTable
+        columns={columns}
+        data={orders}
+        loading={loading}
+        emptyMessage="No orders yet."
+        actions={actions}
+        rowKey={(r) => r._id}
+      />
     </div>
   );
 }

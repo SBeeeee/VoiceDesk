@@ -11,19 +11,21 @@ import leadRoutes from "./routes/lead.routes.js"
 import inventoryRoutes from "./routes/inventory.routes.js"
 import calllogRoutes from "./routes/calllog.routes.js"
 import VapiRoutes from "./routes/vapi.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js"
+
 dotenv.config();
 
-const app=express();
+const app = express();
 
 app.use(cookieParser());
 app.use(
-    cors({
-        origin: [
-      "http://localhost:3000", 
-      
+  cors({
+    origin: [
+      "http://localhost:3000",
+
     ],
     credentials: true,
-    })
+  })
 )
 
 app.use(express.json());
@@ -34,10 +36,12 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/calllogs", calllogRoutes);
+app.use("/api/analytics", analyticsRoutes);
+
 app.use("/api", VapiRoutes);
 
 app.listen(process.env.PORT, () => {
-    console.log("Server is running on http://localhost:" + process.env.PORT);
-    connectDB();
-  
-  });
+  console.log("Server is running on http://localhost:" + process.env.PORT);
+  connectDB();
+
+});

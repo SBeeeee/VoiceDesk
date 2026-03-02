@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "@/src/utils/api";
+import DataTable, { Column, ActionButton } from "@/src/components/dashboard/DataTable";
 
 interface Lead {
   _id: string;
@@ -12,11 +13,24 @@ interface Lead {
   createdAt: string;
 }
 
-const statusStyles = {
-  NEW:       "bg-pink-50 text-pink-600 border-pink-100",
-  CONTACTED: "bg-blue-50 text-blue-600 border-blue-100",
-  CONVERTED: "bg-green-50 text-green-600 border-green-100",
+const statusStyles: Record<string, string> = {
+  NEW: "bg-pink-50 text-pink-600 border border-pink-100",
+  CONTACTED: "bg-blue-50 text-blue-600 border border-blue-100",
+  CONVERTED: "bg-green-50 text-green-600 border border-green-100",
 };
+
+/* ── icons ── */
+const PhoneIcon = (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+  </svg>
+);
+
+const CheckIcon = (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+  </svg>
+);
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -38,6 +52,42 @@ export default function LeadsPage() {
     fetchLeads();
   };
 
+  const columns: Column<Lead>[] = [
+    { key: "name", label: "Name", className: "font-medium text-gray-800" },
+    { key: "phone", label: "Phone", className: "text-gray-600" },
+    { key: "note", label: "Note", className: "text-gray-400 max-w-xs truncate", render: (r) => r.note ?? "—" },
+    {
+      key: "status",
+      label: "Status",
+      render: (r) => (
+        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[r.status]}`}>
+          {r.status}
+        </span>
+      ),
+    },
+    {
+      key: "createdAt",
+      label: "Date",
+      className: "text-xs text-gray-400",
+      render: (r) => new Date(r.createdAt).toLocaleDateString(),
+    },
+  ];
+
+  const actions: ActionButton<Lead>[] = [
+    {
+      icon: PhoneIcon,
+      tooltip: "Mark Contacted",
+      onClick: (r) => updateStatus(r._id, "CONTACTED"),
+      color: "text-gray-400 hover:text-blue-500",
+    },
+    {
+      icon: CheckIcon,
+      tooltip: "Mark Converted",
+      onClick: (r) => updateStatus(r._id, "CONVERTED"),
+      color: "text-gray-400 hover:text-green-500",
+    },
+  ];
+
   return (
     <div className="p-8">
       <div className="mb-6">
@@ -45,56 +95,14 @@ export default function LeadsPage() {
         <p className="text-gray-500 text-sm mt-1">Customers your AI captured during calls.</p>
       </div>
 
-      <div className="bg-white border border-pink-100 rounded-2xl overflow-hidden">
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <svg className="w-5 h-5 text-pink-300 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-          </div>
-        ) : leads.length === 0 ? (
-          <div className="text-center py-16 text-gray-400 text-sm">No leads yet.</div>
-        ) : (
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-pink-50">
-                {["Name", "Phone", "Note", "Status", "Date", ""].map((h) => (
-                  <th key={h} className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide px-5 py-3.5">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-pink-50">
-              {leads.map((lead) => (
-                <tr key={lead._id} className="hover:bg-pink-50/30 transition-colors">
-                  <td className="px-5 py-3.5 text-sm font-medium text-gray-800">{lead.name}</td>
-                  <td className="px-5 py-3.5 text-sm text-gray-600">{lead.phone}</td>
-                  <td className="px-5 py-3.5 text-sm text-gray-400 max-w-xs truncate">{lead.note ?? "—"}</td>
-                  <td className="px-5 py-3.5">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${statusStyles[lead.status]}`}>
-                      {lead.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-xs text-gray-400">
-                    {new Date(lead.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <select
-                      value={lead.status}
-                      onChange={(e) => updateStatus(lead._id, e.target.value)}
-                      className="text-xs border border-pink-100 rounded-lg px-2 py-1 text-gray-600 outline-none focus:border-pink-300 bg-white"
-                    >
-                      <option value="NEW">NEW</option>
-                      <option value="CONTACTED">CONTACTED</option>
-                      <option value="CONVERTED">CONVERTED</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <DataTable
+        columns={columns}
+        data={leads}
+        loading={loading}
+        emptyMessage="No leads yet."
+        actions={actions}
+        rowKey={(r) => r._id}
+      />
     </div>
   );
 }
