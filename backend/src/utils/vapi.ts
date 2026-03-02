@@ -189,10 +189,6 @@ export const createVapiAssistant = async (
       ],
       toolIds,
     },
-    voice: {
-      provider: "11labs",
-      voiceId: "sarah", // A reliable default
-    },
     transcriber: {
       provider: "deepgram",
       model: "nova-2",

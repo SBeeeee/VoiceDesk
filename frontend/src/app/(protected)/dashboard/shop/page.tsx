@@ -16,6 +16,7 @@ export default function ShopPage() {
     phone: "",
     address: "",
     businessHours: { open: "09:00", close: "18:00", days: [] as string[] },
+    services: [] as { name: string; price: number; duration: string; shortDescription: string }[],
   });
 
   const [saved, setSaved] = useState(false);
@@ -35,6 +36,7 @@ export default function ShopPage() {
           close: shop.businessHours?.close ?? "18:00",
           days: shop.businessHours?.days ?? [],
         },
+        services: shop.services ?? [],
       });
     }
   }, [shop]);
@@ -52,6 +54,27 @@ export default function ShopPage() {
           ? p.businessHours.days.filter((d) => d !== day)
           : [...p.businessHours.days, day],
       },
+    }));
+  };
+
+  const addService = () => {
+    setForm((p) => ({
+      ...p,
+      services: [...p.services, { name: "", price: 0, duration: "", shortDescription: "" }],
+    }));
+  };
+
+  const removeService = (index: number) => {
+    setForm((p) => ({
+      ...p,
+      services: p.services.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleServiceChange = (index: number, field: string, value: string | number) => {
+    setForm((p) => ({
+      ...p,
+      services: p.services.map((s, i) => (i === index ? { ...s, [field]: value } : s)),
     }));
   };
 
@@ -179,11 +202,10 @@ export default function ShopPage() {
                 key={day}
                 type="button"
                 onClick={() => toggleDay(day)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  form.businessHours.days.includes(day)
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${form.businessHours.days.includes(day)
                     ? "bg-pink-500 text-white"
                     : "bg-pink-50 text-gray-500 hover:bg-pink-100"
-                }`}
+                  }`}
               >
                 {day}
               </button>
@@ -210,6 +232,88 @@ export default function ShopPage() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Services card */}
+        <div className="bg-white border border-pink-100 rounded-2xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-700">Services</h2>
+            <button
+              type="button"
+              onClick={addService}
+              className="text-xs font-medium text-pink-500 hover:text-pink-600 flex items-center gap-1"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Add Service
+            </button>
+          </div>
+
+          {form.services.length === 0 ? (
+            <div className="text-center py-6 border-2 border-dashed border-pink-50 rounded-xl">
+              <p className="text-xs text-gray-400">No services added yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {form.services.map((service, index) => (
+                <div key={index} className="relative p-4 border border-pink-50 rounded-xl space-y-3 bg-pink-50/10">
+                  <button
+                    type="button"
+                    onClick={() => removeService(index)}
+                    className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-medium text-gray-500 uppercase">Service Name</label>
+                      <input
+                        value={service.name}
+                        onChange={(e) => handleServiceChange(index, "name", e.target.value)}
+                        placeholder="e.g. Haircut"
+                        className="w-full border border-pink-100 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 outline-none focus:border-pink-300"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-medium text-gray-500 uppercase">Price (₹)</label>
+                      <input
+                        type="number"
+                        value={service.price}
+                        onChange={(e) => handleServiceChange(index, "price", parseFloat(e.target.value) || 0)}
+                        placeholder="500"
+                        className="w-full border border-pink-100 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 outline-none focus:border-pink-300"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-medium text-gray-500 uppercase">Duration</label>
+                      <input
+                        value={service.duration}
+                        onChange={(e) => handleServiceChange(index, "duration", e.target.value)}
+                        placeholder="e.g. 30 mins"
+                        className="w-full border border-pink-100 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 outline-none focus:border-pink-300"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-medium text-gray-500 uppercase">Short Description</label>
+                      <input
+                        value={service.shortDescription}
+                        onChange={(e) => handleServiceChange(index, "shortDescription", e.target.value)}
+                        placeholder="Brief overview..."
+                        className="w-full border border-pink-100 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 outline-none focus:border-pink-300"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <button
